@@ -1,6 +1,10 @@
 package com.example.weblinkapp
 
 import android.content.Intent
+import android.content.pm.ShortcutInfo
+import android.content.pm.ShortcutManager
+import android.graphics.drawable.Icon
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -22,9 +26,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var listView: ListView
     private lateinit var emptyView: TextView
 
-    private var pendingTitle: String = ""
-    private var pendingUrl: String = ""
-    private var pendingDesc: String = ""
+    private var pendingTitle = ""
+    private var pendingUrl = ""
+    private var pendingDesc = ""
 
     private val iconNames = arrayOf(
         "Raudona", "Žalia", "Mėlyna", "Oranžinė", "Violetinė",
@@ -58,7 +62,7 @@ class MainActivity : AppCompatActivity() {
 
             createBtn.setOnClickListener { onSukurtiClicked() }
             loadApps()
-            setupListView()
+            refreshList()
         } catch (e: Exception) {
             Toast.makeText(this, "Klaida: ${e.message}", Toast.LENGTH_LONG).show()
         }
@@ -69,20 +73,12 @@ class MainActivity : AppCompatActivity() {
         val url = urlInput.text.toString().trim()
         val desc = descInput.text.toString().trim()
 
-        if (title.isEmpty()) {
-            Toast.makeText(this, "Įvesk pavadinimą", Toast.LENGTH_SHORT).show()
-            return
-        }
-        if (url.isEmpty()) {
-            Toast.makeText(this, "Įvesk URL", Toast.LENGTH_SHORT).show()
-            return
-        }
+        if (title.isEmpty()) { Toast.makeText(this, "Įvesk pavadinimą", Toast.LENGTH_SHORT).show(); return }
+        if (url.isEmpty()) { Toast.makeText(this, "Įvesk URL", Toast.LENGTH_SHORT).show(); return }
         if (!url.startsWith("http://") && !url.startsWith("https://")) {
-            Toast.makeText(this, "URL turi prasidėti http:// arba https://", Toast.LENGTH_SHORT).show()
-            return
+            Toast.makeText(this, "URL turi prasidėti http:// arba https://", Toast.LENGTH_SHORT).show(); return
         }
 
-        // Išsaugom duomenis ir rodom ikonų pasirinkimą
         pendingTitle = title
         pendingUrl = url
         pendingDesc = desc
@@ -91,60 +87,49 @@ class MainActivity : AppCompatActivity() {
 
     private fun showIconPicker() {
         try {
-            val dialog = AlertDialog.Builder(this)
-            dialog.setTitle("Pasirink ikoną")
+            val d = AlertDialog.Builder(this).setTitle("Pasirink ikoną").create()
+            val grid = GridView(this).apply {
+                numColumns = 4
+                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 350)
+                verticalSpacing = 12; horizontalSpacing = 12
+                setPadding(30, 16, 30, 16)
+                adapter = object : BaseAdapter() {
+                    override fun getCount() = iconKeys.size
+                    override fun getItem(p: Int) = iconKeys[p]
+                    override fun getItemId(p: Int) = p.toLong()
+                    override fun getView(p: Int, v: View?, parent: ViewGroup): View {
+                        val ll = if (v == null) LinearLayout(this@MainActivity).apply {
+                            orientation = LinearLayout.VERTICAL
+                            layoutParams = AbsListView.LayoutParams(130, 150)
+                            gravity = android.view.Gravity.CENTER
+                        } else v as LinearLayout
 
-            // Sukuriam paprastą LinearLayout su TextView + GridView
-            val ll = LinearLayout(this)
-            ll.orientation = LinearLayout.VERTICAL
-            ll.setPadding(20, 16, 20, 16)
-
-            val hint = TextView(this)
-            hint.text = "Skirta: ${pendingTitle}"
-            hint.textSize = 14f
-            hint.setTextColor(0xFF666666.toInt())
-            ll.addView(hint)
-
-            val grid = GridView(this)
-            grid.numColumns = 4
-            grid.layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, 300
-            )
-            grid.verticalSpacing = 8
-            grid.horizontalSpacing = 8
-            grid.setPadding(0, 12, 0, 0)
-
-            // Paprastas adapteris be inflate - naudojam ImageView tiesiogiai
-            grid.adapter = object : BaseAdapter() {
-                override fun getCount() = iconKeys.size
-                override fun getItem(pos: Int) = iconKeys[pos]
-                override fun getItemId(pos: Int) = pos.toLong()
-                override fun getView(pos: Int, v: View?, parent: ViewGroup): View {
-                    val iv = if (v == null) {
-                        val img = ImageView(this@MainActivity)
-                        img.layoutParams = AbsListView.LayoutParams(120, 120)
-                        img.setPadding(4, 4, 4, 4)
-                        img.scaleType = ImageView.ScaleType.FIT_CENTER
-                        img
-                    } else v as ImageView
-                    iv.setImageResource(iconDrawables[pos])
-                    return iv
+                        var iv = ll.getChildAt(0) as? ImageView
+                        var tv = ll.getChildAt(1) as? TextView
+                        if (iv == null) {
+                            iv = ImageView(this@MainActivity).apply {
+                                layoutParams = LinearLayout.LayoutParams(80, 80)
+                                scaleType = ImageView.ScaleType.FIT_CENTER
+                            }
+                            tv = TextView(this@MainActivity).apply {
+                                textSize = 11f
+                                gravity = android.view.Gravity.CENTER
+                            }
+                            ll.addView(iv); ll.addView(tv)
+                        }
+                        iv.setImageResource(iconDrawables[p])
+                        tv.text = iconNames[p]
+                        return ll
+                    }
                 }
             }
-
-            ll.addView(grid)
-            dialog.setView(ll)
-            dialog.setNegativeButton("Atšaukti", null)
-
-            val d = dialog.create()
+            d.setView(grid)
+            d.setButton(AlertDialog.BUTTON_NEGATIVE, "Atšaukti") { _, _ -> d.dismiss() }
             d.show()
-
             grid.setOnItemClickListener { _, _, pos, _ ->
                 d.dismiss()
-                Toast.makeText(this, "✅ Kuriama...", Toast.LENGTH_SHORT).show()
                 saveNewApp(pendingTitle, pendingUrl, pendingDesc, iconKeys[pos])
             }
-
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(this, "Klaida: ${e.message}", Toast.LENGTH_LONG).show()
@@ -153,16 +138,20 @@ class MainActivity : AppCompatActivity() {
 
     private fun saveNewApp(title: String, url: String, desc: String, iconKey: String) {
         try {
-            val timestamp = System.currentTimeMillis()
-            val fileName = "app_$timestamp.html"
+            val ts = System.currentTimeMillis()
+            val fileName = "app_$ts.html"
             val html = buildHtmlPage(title, url, desc, iconKey)
-            File(filesDir, fileName).writeText(html)
+            val file = File(filesDir, fileName)
+            file.writeText(html)
 
-            val id = dbHelper.addApp(title, url, desc, iconKey, File(filesDir, fileName).absolutePath)
+            val id = dbHelper.addApp(title, url, desc, iconKey, file.absolutePath)
             if (id == -1L) {
                 Toast.makeText(this, "Klaida išsaugant DB", Toast.LENGTH_SHORT).show()
                 return
             }
+
+            // Sukuriam darbalaukio nuorodą (shortcut)
+            createDesktopShortcut(title, file.absolutePath, iconKey)
 
             loadApps()
             refreshList()
@@ -170,50 +159,116 @@ class MainActivity : AppCompatActivity() {
             urlInput.text.clear()
             descInput.text.clear()
 
-            Toast.makeText(this, "✅ Sukurtas: $title", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "✅ Sukurtas: $title", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
             e.printStackTrace()
             Toast.makeText(this, "Klaida: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
+    private fun createDesktopShortcut(title: String, filePath: String, iconKey: String) {
+        try {
+            val intent = Intent(this, WebViewActivity::class.java).apply {
+                putExtra("filePath", filePath)
+                putExtra("title", title)
+                putExtra("standalone", true)    // atskiras "appsas", ne pagrindinis
+                action = Intent.ACTION_VIEW
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+
+            val iconResId = when (iconKey) {
+                "ic_app_red" -> R.drawable.ic_app_red
+                "ic_app_green" -> R.drawable.ic_app_green
+                "ic_app_blue" -> R.drawable.ic_app_blue
+                "ic_app_orange" -> R.drawable.ic_app_orange
+                "ic_app_purple" -> R.drawable.ic_app_purple
+                "ic_app_cyan" -> R.drawable.ic_app_cyan
+                "ic_app_pink" -> R.drawable.ic_app_pink
+                "ic_app_grey" -> R.drawable.ic_app_grey
+                "ic_app_brown" -> R.drawable.ic_app_brown
+                "ic_app_indigo" -> R.drawable.ic_app_indigo
+                else -> R.drawable.ic_app_blue
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // Android 8+ - ShortcutManager
+                val shortcutManager = getSystemService(ShortcutManager::class.java)
+                if (shortcutManager != null && shortcutManager.isRequestPinShortcutSupported) {
+                    val shortcut = ShortcutInfo.Builder(this, "app_$title")
+                        .setShortLabel(title)
+                        .setLongLabel(title)
+                        .setIcon(Icon.createWithResource(this, iconResId))
+                        .setIntent(intent)
+                        .build()
+                    shortcutManager.requestPinShortcut(shortcut, null)
+                    return
+                }
+            }
+
+            // Android 7.1+ - Pinned shortcut arba senesnis būdas
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                val shortcutManager = getSystemService(ShortcutManager::class.java)
+                if (shortcutManager != null && shortcutManager.isRequestPinShortcutSupported) {
+                    val shortcut = ShortcutInfo.Builder(this, "app_$title")
+                        .setShortLabel(title)
+                        .setLongLabel(title)
+                        .setIcon(Icon.createWithResource(this, iconResId))
+                        .setIntent(intent)
+                        .build()
+                    shortcutManager.requestPinShortcut(shortcut, null)
+                    return
+                }
+            }
+
+            // Senesnis būdas (Android 4-7) - broadcast
+            val shortcutIntent = Intent("com.android.launcher.action.INSTALL_SHORTCUT").apply {
+                putExtra(Intent.EXTRA_SHORTCUT_INTENT, intent)
+                putExtra(Intent.EXTRA_SHORTCUT_NAME, title)
+                putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE,
+                    Intent.ShortcutIconResource.fromContext(this@MainActivity, iconResId))
+                putExtra("duplicate", false)
+            }
+            sendBroadcast(shortcutIntent)
+
+        } catch (e: Exception) {
+            // Jei nepavyko sukurti shortcut - pranešam bet neblokuojam
+            e.printStackTrace()
+            Toast.makeText(this, "Nuoroda nesukurta: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun buildHtmlPage(title: String, url: String, desc: String, iconKey: String): String {
         val bg = when (iconKey) {
-            "ic_app_red" -> "#FF6B6B"
-            "ic_app_green" -> "#4CAF50"
-            "ic_app_blue" -> "#2196F3"
-            "ic_app_orange" -> "#FF9800"
-            "ic_app_purple" -> "#9C27B0"
-            "ic_app_cyan" -> "#00BCD4"
-            "ic_app_pink" -> "#E91E63"
-            "ic_app_grey" -> "#607D8B"
-            "ic_app_brown" -> "#795548"
-            "ic_app_indigo" -> "#3F51B5"
+            "ic_app_red" -> "#FF6B6B"; "ic_app_green" -> "#4CAF50"
+            "ic_app_blue" -> "#2196F3"; "ic_app_orange" -> "#FF9800"
+            "ic_app_purple" -> "#9C27B0"; "ic_app_cyan" -> "#00BCD4"
+            "ic_app_pink" -> "#E91E63"; "ic_app_grey" -> "#607D8B"
+            "ic_app_brown" -> "#795548"; "ic_app_indigo" -> "#3F51B5"
             else -> "#667EEA"
         }
-        val safeTitle = title.replace("\"", "&quot;")
-        val safeDesc = desc.replace("\"", "&quot;")
+        val t = title.replace("\"", "&quot;")
+        val d = desc.replace("\"", "&quot;")
         return """
-<!DOCTYPE html>
-<html lang="lt"><head><meta charset="UTF-8">
+<!DOCTYPE html><html lang="lt"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>$safeTitle</title>
+<title>$t</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,$bg 0%,#333 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
-.card{background:white;border-radius:20px;padding:40px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+background:linear-gradient(135deg,$bg 0%,#333 100%);min-height:100vh;
+display:flex;justify-content:center;align-items:center;padding:20px}
+.card{background:white;border-radius:20px;padding:40px;max-width:400px;width:100%;
+box-shadow:0 20px 60px rgba(0,0,0,.3)}
 h1{color:#333;font-size:24px;margin-bottom:12px;text-align:center}
-.desc{color:#666;font-size:14px;text-align:center;margin-bottom:24px;line-height:1.5}
-.link-btn{display:block;background:$bg;color:white;text-decoration:none;padding:16px 24px;border-radius:12px;text-align:center;font-size:16px;font-weight:600}
+.desc{color:#666;font-size:14px;text-align:center;margin-bottom:24px}
+.link-btn{display:block;background:$bg;color:white;text-decoration:none;
+padding:16px 24px;border-radius:12px;text-align:center;font-size:16px;font-weight:600}
 .link-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px ${bg}66}
 .domain{text-align:center;margin-top:20px;font-size:12px;color:#999}
 </style></head><body>
-<div class="card">
-<h1>$safeTitle</h1>
-<p class="desc">$safeDesc</p>
+<div class="card"><h1>$t</h1><p class="desc">$d</p>
 <a class="link-btn" href="$url" target="_blank">Atidaryti svetainę</a>
-<p class="domain">Sugeneruota per "Apps su nuoroda"</p>
-</div></body></html>"""
+<p class="domain">Sugeneruota per "Apps su nuoroda"</p></div></body></html>"""
     }
 
     private fun loadApps() {
@@ -233,6 +288,7 @@ h1{color:#333;font-size:24px;margin-bottom:12px;text-align:center}
             startActivity(Intent(this, WebViewActivity::class.java).apply {
                 putExtra("filePath", app.htmlPath)
                 putExtra("title", app.title)
+                putExtra("standalone", false)
             })
         }
         listView.setOnItemLongClickListener { _, _, pos, _ ->
@@ -240,18 +296,15 @@ h1{color:#333;font-size:24px;margin-bottom:12px;text-align:center}
         }
     }
 
-    private fun setupListView() = refreshList()
-
     private fun showMenu(pos: Int) {
         val app = appsList[pos]
         AlertDialog.Builder(this)
             .setTitle(app.title)
             .setIcon(app.getIconDrawableId())
-            .setItems(arrayOf("Atidaryti naršyklėje", "Redaguoti", "Trinti")) { _, w ->
+            .setItems(arrayOf("Redaguoti", "Trinti")) { _, w ->
                 when (w) {
-                    0 -> Toast.makeText(this, "Naršyklė nepasiekiama nuo Android 10+\nNaudok WebView (paspaudimas)", Toast.LENGTH_LONG).show()
-                    1 -> editApp(app, pos)
-                    2 -> deleteApp(app, pos)
+                    0 -> editApp(app, pos)
+                    1 -> deleteApp(app, pos)
                 }
             }.show()
     }
@@ -292,26 +345,39 @@ h1{color:#333;font-size:24px;margin-bottom:12px;text-align:center}
     }
 
     private fun pickEditIcon(app: App, pos: Int, title: String, url: String, desc: String) {
+        val d = AlertDialog.Builder(this).setTitle("Pasirink ikoną").create()
         val grid = GridView(this).apply {
-            numColumns = 4; layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, 300)
-            verticalSpacing = 8; horizontalSpacing = 8; setPadding(20, 16, 20, 16)
+            numColumns = 4
+            verticalSpacing = 12; horizontalSpacing = 12
+            setPadding(30, 16, 30, 16)
             adapter = object : BaseAdapter() {
                 override fun getCount() = iconKeys.size
                 override fun getItem(p: Int) = iconKeys[p]
                 override fun getItemId(p: Int) = p.toLong()
                 override fun getView(p: Int, v: View?, parent: ViewGroup): View {
-                    val iv = if (v == null) ImageView(this@MainActivity).apply {
-                        layoutParams = AbsListView.LayoutParams(120, 120)
-                        setPadding(4, 4, 4, 4); scaleType = ImageView.ScaleType.FIT_CENTER
-                    } else v as ImageView
+                    val ll = if (v == null) LinearLayout(this@MainActivity).apply {
+                        orientation = LinearLayout.VERTICAL
+                        layoutParams = AbsListView.LayoutParams(130, 150)
+                        gravity = android.view.Gravity.CENTER
+                    } else v as LinearLayout
+                    var iv = ll.getChildAt(0) as? ImageView
+                    var tv = ll.getChildAt(1) as? TextView
+                    if (iv == null) {
+                        iv = ImageView(this@MainActivity).apply {
+                            layoutParams = LinearLayout.LayoutParams(80, 80)
+                            scaleType = ImageView.ScaleType.FIT_CENTER
+                        }
+                        tv = TextView(this@MainActivity).apply { textSize = 11f; gravity = android.view.Gravity.CENTER }
+                        ll.addView(iv); ll.addView(tv)
+                    }
                     iv.setImageResource(iconDrawables[p])
-                    return iv
+                    tv.text = iconNames[p]
+                    return ll
                 }
             }
         }
-        val d = AlertDialog.Builder(this).setTitle("Pasirink ikoną").setView(grid)
-            .setNegativeButton("Atšaukti", null).create()
+        d.setView(grid)
+        d.setButton(AlertDialog.BUTTON_NEGATIVE, "Atšaukti") { _, _ -> d.dismiss() }
         d.show()
         grid.setOnItemClickListener { _, _, p, _ ->
             d.dismiss()

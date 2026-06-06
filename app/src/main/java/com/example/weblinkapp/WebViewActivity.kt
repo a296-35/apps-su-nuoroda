@@ -20,9 +20,22 @@ class WebViewActivity : AppCompatActivity() {
         val backBtn = findViewById<Button>(R.id.backButton)
         val filePath = intent.getStringExtra("filePath") ?: ""
         val title = intent.getStringExtra("title") ?: "Appsas"
+        val standalone = intent.getBooleanExtra("standalone", false)
 
-        supportActionBar?.title = title
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        // Jei atidaryta iš darbalaukio nuorodos - slepiam action bar ir mygtuką
+        if (standalone) {
+            supportActionBar?.hide()
+            backBtn.visibility = Button.GONE
+            // Darbalaukyje rodom apps pavadinimą
+            setTitle(title)
+        } else {
+            supportActionBar?.title = title
+            supportActionBar?.setDisplayHomeAsUpEnabled(true)
+            backBtn.visibility = Button.VISIBLE
+            backBtn.setOnClickListener {
+                if (webView.canGoBack()) webView.goBack() else finish()
+            }
+        }
 
         webView.webViewClient = WebViewClient()
         webView.settings.javaScriptEnabled = true
@@ -31,7 +44,6 @@ class WebViewActivity : AppCompatActivity() {
         webView.settings.useWideViewPort = true
         webView.settings.allowFileAccess = true
 
-        // Skaitom HTML turinį iš failo ir įkeliame tiesiogiai
         try {
             val file = File(filePath)
             if (file.exists()) {
@@ -39,27 +51,13 @@ class WebViewActivity : AppCompatActivity() {
                 webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
             } else {
                 webView.loadDataWithBaseURL(null, "<h2>Failas nerastas</h2>", "text/html", "UTF-8", null)
-                Toast.makeText(this, "Failas nerastas: $filePath", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
             webView.loadDataWithBaseURL(null, "<h2>Klaida: ${e.message}</h2>", "text/html", "UTF-8", null)
-            Toast.makeText(this, "Klaida: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
-
-        backBtn.setOnClickListener {
-            if (webView.canGoBack()) {
-                webView.goBack()
-            } else {
-                finish()
-            }
         }
     }
 
     override fun onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            super.onBackPressed()
-        }
+        if (webView.canGoBack()) webView.goBack() else super.onBackPressed()
     }
 }
