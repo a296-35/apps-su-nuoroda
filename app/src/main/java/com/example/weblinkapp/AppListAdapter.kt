@@ -1,30 +1,65 @@
 package com.example.weblinkapp
 
 import android.content.Context
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
+import android.widget.BaseAdapter
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 
-class AppListAdapter(context: Context, private val apps: List<App>) :
-    ArrayAdapter<App>(context, 0, apps) {
+class AppListAdapter(private val context: Context, private val apps: List<App>) : BaseAdapter() {
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val view = convertView ?: LayoutInflater.from(context)
-            .inflate(android.R.layout.activity_list_item, parent, false)
+    override fun getCount() = apps.size
+    override fun getItem(pos: Int) = apps[pos]
+    override fun getItemId(pos: Int) = apps[pos].id.toLong()
 
-        val app = apps[position]
+    override fun getView(pos: Int, v: View?, parent: ViewGroup): View {
+        val ll: LinearLayout
+        val icon: ImageView
+        val title: TextView
+        val desc: TextView
 
-        val icon = view.findViewById<ImageView>(android.R.id.icon)
-        val title = view.findViewById<TextView>(android.R.id.text1)
-        val desc = view.findViewById<TextView>(android.R.id.text2)
+        if (v == null) {
+            ll = LinearLayout(context).apply {
+                orientation = LinearLayout.HORIZONTAL
+                setPadding(16, 12, 16, 12)
+            }
+            icon = ImageView(context).apply {
+                layoutParams = LinearLayout.LayoutParams(56, 56)
+                scaleType = ImageView.ScaleType.FIT_CENTER
+            }
+            val tvLayout = LinearLayout(context).apply {
+                orientation = LinearLayout.VERTICAL
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                setPadding(16, 0, 0, 0)
+            }
+            title = TextView(context).apply {
+                textSize = 16f
+                setTextColor(0xFF333333.toInt())
+            }
+            desc = TextView(context).apply {
+                textSize = 13f
+                setTextColor(0xFF999999.toInt())
+            }
+            tvLayout.addView(title)
+            tvLayout.addView(desc)
+            ll.addView(icon)
+            ll.addView(tvLayout)
+            ll.tag = Pair(icon, Pair(title, desc))
+        } else {
+            ll = v as LinearLayout
+            val tag = ll.tag as Pair<ImageView, Pair<TextView, TextView>>
+            icon = tag.first
+            title = tag.second.first
+            desc = tag.second.second
+        }
 
-        icon?.setImageResource(app.getIconDrawableId())
-        title?.text = app.title
-        desc?.text = if (app.description.isNotEmpty()) app.description else app.url
+        val app = apps[pos]
+        icon.setImageResource(app.getIconDrawableId())
+        title.text = app.title
+        desc.text = if (app.description.isNotEmpty()) app.description else app.url
 
-        return view
+        return ll
     }
 }
