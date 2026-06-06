@@ -1,7 +1,6 @@
 package com.example.weblinkapp
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -232,7 +231,7 @@ h1{color:#333;font-size:24px;margin-bottom:12px;text-align:center}
         listView.setOnItemClickListener { _, _, pos, _ ->
             val app = appsList[pos]
             startActivity(Intent(this, WebViewActivity::class.java).apply {
-                putExtra("url", "file://${app.htmlPath}")
+                putExtra("filePath", app.htmlPath)
                 putExtra("title", app.title)
             })
         }
@@ -250,11 +249,7 @@ h1{color:#333;font-size:24px;margin-bottom:12px;text-align:center}
             .setIcon(app.getIconDrawableId())
             .setItems(arrayOf("Atidaryti naršyklėje", "Redaguoti", "Trinti")) { _, w ->
                 when (w) {
-                    0 -> try {
-                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("file://${app.htmlPath}")))
-                    } catch (_: Exception) {
-                        Toast.makeText(this, "Nepavyko atidaryti", Toast.LENGTH_SHORT).show()
-                    }
+                    0 -> Toast.makeText(this, "Naršyklė nepasiekiama nuo Android 10+\nNaudok WebView (paspaudimas)", Toast.LENGTH_LONG).show()
                     1 -> editApp(app, pos)
                     2 -> deleteApp(app, pos)
                 }
