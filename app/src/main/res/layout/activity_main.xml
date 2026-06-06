@@ -89,7 +89,8 @@
         android:id="@+id/emptyView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="📭 Dar nėra sukurtų appsų\nĮvesk duomenis ir paspausk \"Sukurti\""
+        android:text="📭 Dar nėra sukurtų appsų
+Įvesk duomenis ir paspausk Sukurti"
         android:textSize="16sp"
         android:textColor="#999"
         android:gravity="center"
