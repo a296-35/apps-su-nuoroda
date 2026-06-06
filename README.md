@@ -1,17 +1,23 @@
-# 📱 **Apps su nuoroda Generatorius** — Android programa
+# 📱 **Apps su nuoroda Generatorius** — v1.1
 
 Android programėlė, kuri leidžia **kurti, redaguoti ir trinti** atskirus "appsu" (HTML puslapius) su nuorodomis į svetaines. Kiekvienas sugeneruotas puslapis yra nepriklausomas ir gali būti atidarytas kaip atskiras WebView arba naršyklėje.
+
+**🔗 GitHub:** https://github.com/a296-35/apps-su-nuoroda
+**📦 APK:** GitHub Actions → Artifacts
 
 ---
 
 ## 📋 Turinys
 
 - [Funkcijos](#-funkcijos)
+- [Versijų istorija](#-versijų-istorija)
 - [Reikalavimai](#-reikalavimai)
 - [Kaip paleisti](#-kaip-paleisti)
+- [Kaip naudotis](#-kaip-naudotis)
 - [Projekto struktūra](#-projekto-struktūra)
 - [Kaip veikia](#-kaip-veikia)
-- [Kaip padaryti, kad appsas atrodytų kaip atskira programėlė (PWA)](#-kaip-padaryti-kad-appsas-atrodytų-kaip-atskira-programėlė-pwa)
+- [Auto-build su GitHub Actions](#-auto-build-su-github-actions)
+- [PWA (atskira programėlė namų ekrane)](#-kaip-padaryti-kad-appsas-atrodytų-kaip-atskira-programėlė-pwa)
 - [Galimos problemos](#-galimos-problemos)
 
 ---
@@ -20,13 +26,39 @@ Android programėlė, kuri leidžia **kurti, redaguoti ir trinti** atskirus "app
 
 | Funkcija | Kaip veikia |
 |---|---|
-| **Sukurti naują appsą** | Įvedi pavadinimą, URL, aprašymą → sugeneruojamas HTML failas |
+| **Sukurti naują appsą** | Įvedi pavadinimą, URL, aprašymą → pasirenki ikoną → sugeneruojamas HTML |
+| **10 ikonų** | Raudona, Žalia, Mėlyna, Oranžinė, Violetinė, Cian, Rožinė, Pilka, Ruda, Indigo |
 | **Atidaryti viduje** | Paspaudi ant apps'o → atsidaro WebView šioje programėlėje |
 | **Atidaryti naršyklėje** | Ilgas paspaudimas → "Atidaryti naršyklėje" |
-| **Redaguoti** | Ilgas paspaudimas → "Redaguoti" → pakeičia pavadinimą/URL/aprašymą |
+| **Redaguoti** | Ilgas paspaudimas → "Redaguoti" → gali keist pavadinimą, URL, aprašymą, ikoną |
 | **Trinti** | Ilgas paspaudimas → "Trinti" |
 | **Duomenys išlieka** | Visi duomenys saugomi SQLite + HTML failai vidiniame storage |
 | **Nepriklausomi** | Kiekvienas appsas turi unikalų ID ir savo HTML failą |
+| **Klaidų pranešimai** | Visos klaidos rodomos Toast žinutėmis |
+| **URL validacija** | Tikrina ar URL prasideda `http://` arba `https://` |
+| **Tuščias sąrašas** | Rodo pranešimą kai nėra appsų |
+
+---
+
+## 📋 Versijų istorija
+
+### v1.1 (2026-06-06)
+- ✅ Pridėtos 10 spalvotų ikonų (pasirinkimas kuriant ir redaguojant)
+- ✅ Error handling — visos klaidos rodomos Toast žinutėmis
+- ✅ URL validacija — tikrina ar prasideda `http://` ar `https://`
+- ✅ Ikonos rodomos sąraše šalia pavadinimo
+- ✅ Tuščias sąrašas rodo pranešimą "Dar nėra sukurtų appsų"
+- ✅ DB migracija — seni įrašai neištrinami atnaujinus (pridedamas icon stulpelis)
+- ✅ Pataisyta XML sintaksė
+- ✅ Pridėtas .gitignore
+
+### v1.0 (2026-06-06)
+- ✅ Pagrindinis langas su įvesties laukais
+- ✅ HTML failų generavimas
+- ✅ SQLite duomenų bazė (CRUD)
+- ✅ WebView peržiūra
+- ✅ Redagavimo / trynimo dialogai
+- ✅ GitHub Actions auto-build
 
 ---
 
@@ -41,36 +73,29 @@ Android programėlė, kuri leidžia **kurti, redaguoti ir trinti** atskirus "app
 
 ## 🚀 Kaip paleisti
 
-### 1. Atsisiųsk arba nukopijuok projektą
+### 1. Atsisiųsk APK (rekomenduojama)
 
-```bash
-# Nukopijuok visą projektą į savo kompiuterį
-# arba sukurk naują Android Studio projektą ir pakeisk failus
-```
+Nueik į GitHub Actions → pasirink naujausią build'ą → **Artifacts** → `apps-su-nuoroda-debug.zip` → išarchyvuok → įdiek `app-debug.apk` į telefoną.
 
-### 2. Atidaryk Android Studio
+### 2. Arba atidaryk Android Studio
 
 ```
 File → Open → Pasirink android-app-generator/ katalogą
 ```
 
-### 3. Palauk, kol Gradle sinc'uosis
+Palauk kol Gradle sinc'uosis, tada `Run`.
 
-Android Studio automatiškai atsisiųs reikiamas bibliotekas.
+---
 
-### 4. Paleisk
-
-```
-Prijunk telefoną (USB debugging ON) arba naudok emuliatorių
-Run → pasirink įrenginį
-```
-
-### 5. Naudok
+## 📱 Kaip naudotis
 
 ```
-Įvesk pavadinimą + URL → "Sukurti naują appsą"
-Paspaudus ant apps'o → atsidaro WebView viduje
-Ilgas paspaudimas → meniu (atidaryti naršyklėje / redaguoti / trinti)
+1. Įvesk pavadinimą + URL + aprašymą
+2. Paspausk "✨ Sukurti naują appsą"
+3. Iššoka langas — pasirink ikoną (10 spalvų)
+4. Appsas atsiranda sąraše
+5. Paspaudus → atsidaro WebView viduje
+6. Ilgas paspaudimas → meniu: atidaryti naršyklėje / redaguoti / trinti
 ```
 
 ---
@@ -79,31 +104,44 @@ Ilgas paspaudimas → meniu (atidaryti naršyklėje / redaguoti / trinti)
 
 ```
 android-app-generator/
-├── build.gradle.kts              # Root Gradle config
-├── settings.gradle.kts           # Projektų sąrašas
-├── gradle.properties             # Gradle nustatymai
-├── gradle/wrapper/
-│   └── gradle-wrapper.properties
+├── .github/workflows/build-apk.yml  # Auto-build GitHub Actions
+├── .gitignore
+├── build.gradle.kts                 # Root Gradle config
+├── settings.gradle.kts              # Projektų sąrašas
+├── gradle.properties                # Gradle nustatymai
+├── README.md                        # Šis failas
+├── BUILD.md                         # Kaip push'inti į GitHub
 └── app/
-    ├── build.gradle.kts          # App modulio Gradle config
+    ├── build.gradle.kts             # App modulio Gradle config
     ├── proguard-rules.pro
     └── src/main/
         ├── AndroidManifest.xml
         ├── java/com/example/weblinkapp/
-        │   ├── MainActivity.kt       # Pagrindinis langas
-        │   ├── WebViewActivity.kt     # WebView peržiūrai
-        │   ├── AppDatabaseHelper.kt   # SQLite DB valdymas
-        │   └── App.kt                # Data klasė
+        │   ├── MainActivity.kt          # Pagrindinis langas + ikonų picker
+        │   ├── WebViewActivity.kt        # WebView peržiūrai
+        │   ├── AppDatabaseHelper.kt      # SQLite DB valdymas (v2 schema)
+        │   ├── AppListAdapter.kt         # Custom adapter su ikonomis
+        │   └── App.kt                   # Data klasė su ikonų mapping'u
         └── res/
             ├── layout/
-            │   ├── activity_main.xml  # Pagrindinis UI
-            │   └── activity_webview.xml # WebView UI
+            │   ├── activity_main.xml     # Pagrindinis UI + empty state
+            │   └── activity_webview.xml  # WebView UI
             ├── values/
             │   ├── strings.xml
             │   ├── colors.xml
             │   └── themes.xml
             └── drawable/
-                └── edit_text_bg.xml   # Įvesties laukų fonas
+                ├── edit_text_bg.xml      # Įvesties laukų fonas
+                ├── ic_app_red.xml        # 10 ikonų (spalvoti apskritimai)
+                ├── ic_app_green.xml
+                ├── ic_app_blue.xml
+                ├── ic_app_orange.xml
+                ├── ic_app_purple.xml
+                ├── ic_app_cyan.xml
+                ├── ic_app_pink.xml
+                ├── ic_app_grey.xml
+                ├── ic_app_brown.xml
+                └── ic_app_indigo.xml
 ```
 
 ---
@@ -116,13 +154,18 @@ android-app-generator/
 Vartotojas įveda: [Pavadinimas] [URL] [Aprašymas]
         │
         ▼
+Iššoka ikonų pasirinkimo langas (10 spalvų)
+        │
+        ▼
 Sukuriame HTML failą: app_<timestamp>.html
+  (su parinkta ikonos spalva kaip fono gradiento spalva)
         │
         ▼
-Įrašome į SQLite DB: id | title | url | description | htmlPath
+Įrašome į SQLite DB:
+  id | title | url | description | icon | htmlPath
         │
         ▼
-Atvaizduojame ListView sąraše
+Atvaizduojame ListView sąraše su ikona + pavadinimu + URL
         │
         ▼
 Paspaudus → WebViewActivity rodo HTML failą
@@ -137,11 +180,41 @@ Ilgas paspaudimas → meniu (naršyklė / redaguoti / trinti)
 
 Šie failai išlieka net uždarius programėlę ir yra unikalūs kiekvienam appsui.
 
+### Ikonų spalvos
+
+| Ikonos pavadinimas | Spalva |
+|---|---|
+| Raudona | `#FF6B6B` |
+| Žalia | `#4CAF50` |
+| Mėlyna | `#2196F3` |
+| Oranžinė | `#FF9800` |
+| Violetinė | `#9C27B0` |
+| Cian | `#00BCD4` |
+| Rožinė | `#E91E63` |
+| Pilka | `#607D8B` |
+| Ruda | `#795548` |
+| Indigo | `#3F51B5` |
+
+---
+
+## 🤖 Auto-build su GitHub Actions
+
+Kiekvieną kartą push'inus kodą į `main`, GitHub Actions automatiškai:
+1. Atsisiunčia Gradle 8.5
+2. Nustato Android SDK
+3. Sukompiliuoja APK
+4. Įkelia APK kaip artifact'ą
+
+**Atsisiųsti APK:**
+1. Nueik į https://github.com/a296-35/apps-su-nuoroda/actions
+2. Pasirink naujausią run'ą
+3. Skiltyje **Artifacts** atsisiųsk `apps-su-nuoroda-debug.zip`
+
 ---
 
 ## 🌐 Kaip padaryti, kad appsas atrodytų kaip atskira programėlė (PWA)
 
-Sugeneruoti HTML puslapiai gali būti paversti **Progressive Web Apps (PWA)**. Tada vartotojas gali juos įsirašyti į namų ekraną kaip atskiras programėles.
+Sugeneruoti HTML puslapiai gali būti paversti **Progressive Web Apps (PWA)**.
 
 ### 1. Pridėk manifest.json prie HTML
 
@@ -149,7 +222,7 @@ Sugeneruoti HTML puslapiai gali būti paversti **Progressive Web Apps (PWA)**. T
 <link rel="manifest" href="manifest.json">
 ```
 
-### 2. Sukurk manifest.json šalia HTML failo
+### 2. Sukurk manifest.json
 
 ```json
 {
@@ -160,11 +233,7 @@ Sugeneruoti HTML puslapiai gali būti paversti **Progressive Web Apps (PWA)**. T
   "background_color": "#ffffff",
   "theme_color": "#667EEA",
   "icons": [
-    {
-      "src": "icon.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    }
+    { "src": "icon.png", "sizes": "192x192", "type": "image/png" }
   ]
 }
 ```
@@ -179,16 +248,7 @@ self.addEventListener('activate', e => e.waitUntil(clients.claim()));
 
 ### 4. Įdiek
 
-Kai vartotojas atidaro HTML puslapį per naršyklę (ne per WebView), Chrome pasiūlys:
-```
-➕ Įdiegti į namų ekraną
-```
-
-### PWA alternatyva — serverio sprendimas
-
-Jei nori, kad appsai veiktų iš bet kurio įrenginio:
-- Įkelk HTML failus į serverį (pvz., `https://tavo-domenas.com/apps/app_123.html`)
-- Nuoroda bus pasiekiama iš bet kur
+Chrome pasiūlys **"Įdiegti į namų ekraną"**.
 
 ---
 
@@ -197,32 +257,28 @@ Jei nori, kad appsai veiktų iš bet kurio įrenginio:
 | Problema | Sprendimas |
 |---|---|
 | **WebView neįsikrauna** | Patikrink `AndroidManifest.xml` ar yra `<uses-permission android:name="android.permission.INTERNET" />` |
-| **file:// nuorodos neveikia naršyklėje** | Nuo Android 10+ `file://` URI gali būti blokuojami. Naudok WebView vietoj to |
-| **Duomenys dingsta uždarius** | Visi duomenys saugomi SQLite + failuose, jie neištrinami |
-| **Gradle klaida** | Patikrink ar naudoji JDK 17 ir Android Studio naujausią versiją |
-| **MinSdk problema** | Projektas naudoja API 21 (Android 5.0). Jei reikia senesnės versijos — pakeisk `app/build.gradle.kts` |
-| **Neranda R.layout.activity_webview** | Įsitikink, kad `activity_webview.xml` sukurtas `res/layout/` kataloge |
-| **WebViewActivity nepridėta į manifestą** | Pridėk į `AndroidManifest.xml`:
-
-```xml
-<activity android:name=".WebViewActivity" />
-```
+| **file:// nuorodos neveikia naršyklėje** | Nuo Android 10+ `file://` URI gali būti blokuojami. Naudok WebView |
+| **Gradle klaida** | Patikrink ar naudoji JDK 17 |
+| **Po atnaujinimo seni appsai dingę** | DB migracija veikia — seni įrašai lieka. Jei problema — ištrink programėlę ir įdiek iš naujo |
+| **Build'as krenta** | Pažiūrėk GitHub Actions log'us — ten matosi tiksli klaida |
 
 ---
 
 ## 🔧 Pritaikymas
 
 ### Pakeisti programėlės pavadinimą
-Failas: `res/values/strings.xml`
 ```xml
+<!-- res/values/strings.xml -->
 <string name="app_name">Mano vardas</string>
 ```
 
 ### Pakeisti spalvas
 Failas: `res/values/colors.xml`
 
-### Pridėti daugiau laukų
-Pridėk `EditText` į `activity_main.xml` ir atitinkamą kintamąjį `MainActivity.kt`.
+### Pridėti daugiau ikonų
+1. Sukurk naują vektorinę drawable ikoną `res/drawable/`
+2. Pridėk į `iconResArray` masyvą `MainActivity.kt`
+3. Pridėk į `getIconDrawableId()` `App.kt`
 
 ---
 
