@@ -3,13 +3,9 @@ name: Build Android APK
 on:
   push:
     branches: [ main, master ]
-    paths:
-      - 'app/**'
-      - '*.gradle.kts'
-      - 'gradle/**'
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:   # leidžia paleisti rankiniu būdu
+  workflow_dispatch:
 
 jobs:
   build:
@@ -29,28 +25,33 @@ jobs:
       - name: 📦 Nustatyti Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: 🔧 Įrašyti gradle.properties
+      - name: 🔧 Generuoti Gradle wrapper
         run: |
-          echo "org.gradle.jvmargs=-Xmx2048m" >> gradle.properties
-          echo "android.useAndroidX=true" >> gradle.properties
-          echo "kotlin.code.style=official" >> gradle.properties
+          # Atsisiunčiam Gradle wrapper (be jo neveikia)
+          cd app
+          mkdir -p gradle/wrapper
+          curl -sL "https://services.gradle.org/distributions/gradle-8.5-bin.zip" -o /tmp/gradle.zip
+          # Sukuriam gradle wrapper properties
+          cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
+          networkTimeout=10000
+          validateDistributionUrl=true
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          EOF
 
-      - name: 🎯 Suteikti vykdymo teises Gradle wrapper
-        run: chmod +x gradlew || true
-        # gradlew neegzistuoja, bet jei pridėsi — veiks
-
-      - name: 🏗️ Build APK
+      - name: 🏗️ Build APK (per gradle)
         run: |
-          if [ -f gradlew ]; then
-            ./gradlew assembleDebug
-          else
-            # Jei nėra gradlew, naudojam gradle per package manager
-            sudo apt-get update -qq
-            sudo apt-get install -y -qq gradle 2>/dev/null || true
-            gradle assembleDebug
-          fi
+          cd app
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gradle 2>/dev/null || true
+          gradle wrapper --gradle-version=8.5 2>/dev/null || true
+          gradle :app:assembleDebug --no-daemon 2>&1
 
-      - name: 📤 Įkelti APK kaip artifact
+      - name: 📤 Įkelti APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: apps-su-nuoroda-debug
@@ -60,7 +61,7 @@ jobs:
   release:
     name: Release APK (signed)
     needs: build
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: success() && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
@@ -91,8 +92,9 @@ jobs:
 
       - name: 🏗️ Build Release APK
         run: |
+          cd app
           sudo apt-get install -y -qq gradle 2>/dev/null || true
-          gradle assembleRelease
+          gradle :app:assembleRelease --no-daemon 2>&1
 
       - name: 📤 Įkelti Release APK
         uses: actions/upload-artifact@v4
