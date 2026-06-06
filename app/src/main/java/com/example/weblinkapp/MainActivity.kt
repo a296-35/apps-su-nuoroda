@@ -152,7 +152,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             // Sukuriam darbalaukio nuorodą (shortcut)
-            createDesktopShortcut(title, file.absolutePath, iconKey)
+            createDesktopShortcut(title, url, iconKey)
 
             loadApps()
             refreshList()
@@ -167,10 +167,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun createDesktopShortcut(title: String, filePath: String, iconKey: String) {
+    private fun createDesktopShortcut(title: String, url: String, iconKey: String) {
         try {
             val intent = Intent(this, WebViewActivity::class.java).apply {
-                putExtra("filePath", filePath)
+                putExtra("url", url)
                 putExtra("title", title)
                 putExtra("standalone", true)
                 action = Intent.ACTION_VIEW

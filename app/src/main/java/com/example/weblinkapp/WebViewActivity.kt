@@ -18,42 +18,54 @@ class WebViewActivity : AppCompatActivity() {
 
         webView = findViewById(R.id.webView)
         val backBtn = findViewById<Button>(R.id.backButton)
+        val url = intent.getStringExtra("url") ?: ""
         val filePath = intent.getStringExtra("filePath") ?: ""
         val title = intent.getStringExtra("title") ?: "Appsas"
         val standalone = intent.getBooleanExtra("standalone", false)
 
-        // Jei atidaryta iš darbalaukio nuorodos - slepiam action bar ir mygtuką
         if (standalone) {
+            // Darbalaukio nuoroda - kraunam URL tiesiogiai
             supportActionBar?.hide()
             backBtn.visibility = Button.GONE
-            // Darbalaukyje rodom apps pavadinimą
             setTitle(title)
+
+            webView.webViewClient = WebViewClient()
+            webView.settings.javaScriptEnabled = true
+            webView.settings.domStorageEnabled = true
+            webView.settings.loadWithOverviewMode = true
+            webView.settings.useWideViewPort = true
+
+            if (url.isNotEmpty()) {
+                webView.loadUrl(url)
+            } else if (filePath.isNotEmpty()) {
+                webView.loadDataWithBaseURL(null, File(filePath).readText(), "text/html", "UTF-8", null)
+            }
         } else {
+            // Peržiūra iš pagrindinio apps'o
             supportActionBar?.title = title
             supportActionBar?.setDisplayHomeAsUpEnabled(true)
             backBtn.visibility = Button.VISIBLE
             backBtn.setOnClickListener {
                 if (webView.canGoBack()) webView.goBack() else finish()
             }
-        }
 
-        webView.webViewClient = WebViewClient()
-        webView.settings.javaScriptEnabled = true
-        webView.settings.domStorageEnabled = true
-        webView.settings.loadWithOverviewMode = true
-        webView.settings.useWideViewPort = true
-        webView.settings.allowFileAccess = true
+            webView.webViewClient = WebViewClient()
+            webView.settings.javaScriptEnabled = true
+            webView.settings.domStorageEnabled = true
+            webView.settings.loadWithOverviewMode = true
+            webView.settings.useWideViewPort = true
+            webView.settings.allowFileAccess = true
 
-        try {
-            val file = File(filePath)
-            if (file.exists()) {
-                val htmlContent = file.readText()
-                webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
-            } else {
-                webView.loadDataWithBaseURL(null, "<h2>Failas nerastas</h2>", "text/html", "UTF-8", null)
+            try {
+                val file = File(filePath)
+                if (file.exists()) {
+                    webView.loadDataWithBaseURL(null, file.readText(), "text/html", "UTF-8", null)
+                } else {
+                    Toast.makeText(this, "Failas nerastas", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this, "Klaida: ${e.message}", Toast.LENGTH_SHORT).show()
             }
-        } catch (e: Exception) {
-            webView.loadDataWithBaseURL(null, "<h2>Klaida: ${e.message}</h2>", "text/html", "UTF-8", null)
         }
     }
 
