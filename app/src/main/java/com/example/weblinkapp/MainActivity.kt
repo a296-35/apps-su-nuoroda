@@ -123,7 +123,7 @@ class MainActivity : AppCompatActivity() {
                 override fun getView(pos: Int, v: View?, parent: ViewGroup): View {
                     val iv = if (v == null) {
                         val img = ImageView(this@MainActivity)
-                        img.layoutParams = GridView.LayoutParams(120, 120)
+                        img.layoutParams = AbsListView.LayoutParams(120, 120)
                         img.setPadding(4, 4, 4, 4)
                         img.scaleType = ImageView.ScaleType.FIT_CENTER
                         img
@@ -307,7 +307,7 @@ h1{color:#333;font-size:24px;margin-bottom:12px;text-align:center}
                 override fun getItemId(p: Int) = p.toLong()
                 override fun getView(p: Int, v: View?, parent: ViewGroup): View {
                     val iv = if (v == null) ImageView(this@MainActivity).apply {
-                        layoutParams = GridView.LayoutParams(120, 120)
+                        layoutParams = AbsListView.LayoutParams(120, 120)
                         setPadding(4, 4, 4, 4); scaleType = ImageView.ScaleType.FIT_CENTER
                     } else v as ImageView
                     iv.setImageResource(iconDrawables[p])
