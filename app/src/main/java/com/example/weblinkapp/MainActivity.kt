@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity() {
                             ll.addView(iv); ll.addView(tv)
                         }
                         iv.setImageResource(iconDrawables[p])
-                        tv.text = iconNames[p]
+                        tv!!.text = iconNames[p]
                         return ll
                     }
                 }
@@ -371,7 +371,7 @@ padding:16px 24px;border-radius:12px;text-align:center;font-size:16px;font-weigh
                         ll.addView(iv); ll.addView(tv)
                     }
                     iv.setImageResource(iconDrawables[p])
-                    tv.text = iconNames[p]
+                    tv!!.text = iconNames[p]
                     return ll
                 }
             }
