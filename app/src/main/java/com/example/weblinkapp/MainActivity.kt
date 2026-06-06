@@ -175,7 +175,7 @@ class MainActivity : AppCompatActivity() {
                 putExtra("standalone", true)
                 action = Intent.ACTION_VIEW
                 data = android.net.Uri.parse("apps-nuoroda://shortcut/${title.hashCode()}")
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT
             }
 
             val iconResId = when (iconKey) {
