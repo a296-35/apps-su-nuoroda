@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -172,6 +173,8 @@ class MainActivity : AppCompatActivity() {
                 putExtra("filePath", filePath)
                 putExtra("title", title)
                 putExtra("standalone", true)
+                action = Intent.ACTION_VIEW
+                data = android.net.Uri.parse("apps-nuoroda://shortcut/${title.hashCode()}")
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
 
