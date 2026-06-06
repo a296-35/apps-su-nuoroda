@@ -17,7 +17,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".WebViewActivity" />
+        <activity android:name=".WebViewActivity" android:exported="true" />
     </application>
 
 </manifest>

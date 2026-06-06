@@ -171,8 +171,7 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, WebViewActivity::class.java).apply {
                 putExtra("filePath", filePath)
                 putExtra("title", title)
-                putExtra("standalone", true)    // atskiras "appsas", ne pagrindinis
-                action = Intent.ACTION_VIEW
+                putExtra("standalone", true)
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
 
