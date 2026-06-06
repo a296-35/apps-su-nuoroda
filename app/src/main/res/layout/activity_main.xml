@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#F5F5F5">
+
+    <!-- Antraštė -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="📱 Apps su nuoroda"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#333"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Generatorius"
+        android:textSize="14sp"
+        android:textColor="#999"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Įvesties laukai -->
+    <EditText
+        android:id="@+id/titleEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="🏷️ App pavadinimas"
+        android:padding="14dp"
+        android:background="@drawable/edit_text_bg"
+        android:layout_marginBottom="10dp"
+        android:inputType="text" />
+
+    <EditText
+        android:id="@+id/urlEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="🔗 URL (pvz.: https://example.com)"
+        android:padding="14dp"
+        android:background="@drawable/edit_text_bg"
+        android:layout_marginBottom="10dp"
+        android:inputType="textUri" />
+
+    <EditText
+        android:id="@+id/descriptionEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="📝 Aprašymas (neprivaloma)"
+        android:padding="14dp"
+        android:background="@drawable/edit_text_bg"
+        android:layout_marginBottom="16dp"
+        android:inputType="text" />
+
+    <!-- Mygtukas -->
+    <Button
+        android:id="@+id/createButton"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="✨ Sukurti naują appsą"
+        android:textSize="16sp"
+        android:backgroundTint="#667EEA"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Skyrius -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sukurti appsai"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#333"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="💡 Ilgas paspaudimas → meniu (redaguoti / trinti)"
+        android:textSize="12sp"
+        android:textColor="#999"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Sąrašas -->
+    <ListView
+        android:id="@+id/appsListView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="1dp" />
+
+</LinearLayout>
